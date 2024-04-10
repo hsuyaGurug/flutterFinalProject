@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:projectshoe/services/authorization.dart';
 import 'package:projectshoe/services/database.dart';
+import 'package:projectshoe/widgets/Shoe.dart';
 
 class Explore extends StatefulWidget {
   State<Explore> createState() => ExploreState();
@@ -19,7 +18,7 @@ class ExploreState extends State<Explore> {
       body: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           StreamBuilder(
-              stream: db.streamOfShoes(Authorization().currentUser!.uid),
+              stream: db.streamOfShoes(),
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                 print('home.StreamBuilder.builder ${snapshot.connectionState}');
@@ -33,12 +32,13 @@ class ExploreState extends State<Explore> {
                 print('Data: YES');
                 var listOfDocs = snapshot.data!.docs;
                 print(listOfDocs.length);
+
                 return Expanded(
                   child: ListView.builder(
                       itemCount: listOfDocs.length,
                       itemBuilder: (BuildContext context, index) {
                         var doc = listOfDocs[index];
-                        return Text(doc.data()['Name']);
+                        return shoe(document: doc);
                       }),
                 );
               })

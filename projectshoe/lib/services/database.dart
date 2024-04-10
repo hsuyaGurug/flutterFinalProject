@@ -17,7 +17,7 @@ class Database {
     }
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> streamOfShoes(String userId) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamOfShoes() {
     print('Database streamOfAppData: TRY');
     try {
       return FirebaseFirestore.instance.collection("shoe").snapshots();
