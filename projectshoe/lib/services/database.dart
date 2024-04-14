@@ -27,52 +27,47 @@ class Database {
     }
   }
 
-  Future<void> addAppData(String content, String userId) async {
-    print('Database addAppData: TRY');
+  Future<QuerySnapshot<Map<String, dynamic>>> streamOfFavouriteShoes(
+      String userId) {
     try {
-      await FirebaseFirestore.instance
+      return FirebaseFirestore.instance
           .collection("users")
           .doc(userId)
-          .collection("todos")
-          .add({
-        'dateCreated': Timestamp.now(),
-        'content': content,
-        'done': false,
-      });
-      print('Database addAppData: SUCCESS');
+          .collection("favourites")
+          .snapshots()
+          .first;
     } catch (e) {
-      print('Database addAppData: CATCH $e.toString');
+      print('Database streamOfFavourites: Catch $e');
+      rethrow;
     }
   }
 
-  Future<void> updateAppData(
-      bool? newDoneValue, String userId, String appDataId) async {
-    print('Database updateAppData: TRY');
+  Future<void> addFavouriteShoe(
+      Map<String, dynamic> shoe, String userId) async {
     try {
       await FirebaseFirestore.instance
           .collection("users")
           .doc(userId)
-          .collection("todos")
-          .doc(appDataId)
-          .update({"done": newDoneValue});
-      print('Database updateAppData: SUCCESS');
+          .collection("favourites")
+          .add(shoe);
     } catch (e) {
-      print('Database updateAppData: CATCH $e.toString');
+      print('Database addFavouriteShoe: CATCH $e.toString');
     }
   }
 
-  Future<void> deleteAppData(String userId, String appDataId) async {
-    print('Database deleteAppData: TRY');
+  Future<void> removeFavouriteShoe(String userId, int shoeId) async {
     try {
       await FirebaseFirestore.instance
           .collection("users")
           .doc(userId)
-          .collection("todos")
-          .doc(appDataId)
-          .delete();
-      print('Database deleteAppData: SUCCESS');
+          .collection("favourites")
+          .where("id", isEqualTo: shoeId)
+          .get()
+          .then((value) => value.docs.forEach((element) {
+                element.reference.delete();
+              }));
     } catch (e) {
-      print('Database deleteAppData: CATCH $e.toString');
+      print('Database removeFavouriteShoe: CATCH $e.toString');
     }
   }
 }

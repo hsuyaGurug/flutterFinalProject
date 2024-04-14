@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:projectshoe/services/authorization.dart';
-import 'package:projectshoe/widgets/Favorite.dart';
 
 class SignUp extends StatelessWidget {
   final Function parentCallback;
@@ -52,15 +51,7 @@ class SignUp extends StatelessWidget {
                     await Authorization().createUser(nameController.text,
                         emailController.text, passwordController.text);
                     //Rebuild the parent widget which is Favorite or Profile
-                    Navigator.pop(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Favorite(
-                              loggedIn: Authorization().currentUser == null
-                                  ? false
-                                  : true,
-                              authCallback: parentCallback)),
-                    );
+
                     parentCallback();
                   } catch (e) {
                     print(e);

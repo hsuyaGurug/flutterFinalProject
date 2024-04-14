@@ -4,8 +4,12 @@ import 'package:projectshoe/widgets/logIn.dart';
 class Favorite extends StatefulWidget {
   final bool loggedIn;
   final Function authCallback;
+  final Function favouriteCallback;
 
-  Favorite({required this.loggedIn, required this.authCallback});
+  Favorite(
+      {required this.loggedIn,
+      required this.authCallback,
+      required this.favouriteCallback});
   @override
   State<Favorite> createState() => FavoriteState();
 }

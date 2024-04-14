@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:projectshoe/services/authorization.dart';
+import 'package:projectshoe/services/database.dart';
 import 'package:projectshoe/widgets/Explore.dart';
 import 'package:projectshoe/widgets/Favorite.dart';
 import 'package:projectshoe/widgets/Profile.dart';
@@ -12,9 +14,58 @@ class NavBar extends StatefulWidget {
 }
 
 class NavState extends State<NavBar> {
+  Database db = Database();
   int _currentIndex = 0;
   //checks if the user is logged in or not
   bool loggedIn = Authorization().currentUser == null ? false : true;
+
+  //list of favourite shoes
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> favouriteShoes = [];
+
+  //Callback function for the childwidgets
+  void addRemoveFavourite(
+      QueryDocumentSnapshot<Map<String, dynamic>> shoe, bool adding) {
+    if (adding) {
+      favouriteShoes.add(shoe);
+      if (loggedIn) {
+        db.addFavouriteShoe(shoe.data(), Authorization().currentUser!.uid);
+      }
+    } else {
+      favouriteShoes.remove(shoe);
+      if (loggedIn) {
+        db.removeFavouriteShoe(
+            Authorization().currentUser!.uid, shoe.data()["id"]);
+      }
+    }
+  }
+
+  Future<List<QuerySnapshot<Map<String, dynamic>>>> futureToList(
+      Future<QuerySnapshot<Map<String, dynamic>>> future) async {
+    // Wait for the future to complete
+    QuerySnapshot<Map<String, dynamic>> snapshot = await future;
+
+    // Convert the single QuerySnapshot to a list
+    List<QuerySnapshot<Map<String, dynamic>>> list = [snapshot];
+
+    return list;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    print("BeforeeEEEEEEEEEEEEEEEEEEEEEE");
+
+    favouriteShoes.forEach(
+      (element) => print(element.data()),
+    );
+
+    print("AFTERRRRRRRRRRRRRR");
+
+    favouriteShoes.forEach(
+      (element) => print(element.data()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +86,10 @@ class NavState extends State<NavBar> {
         ],
       ),
       body: <Widget>[
-        Explore(),
+        Explore(
+          favouriteShoes: favouriteShoes,
+          addRemoveFavourite: addRemoveFavourite,
+        ),
         Favorite(
           loggedIn: loggedIn,
           authCallback: () {
@@ -43,6 +97,7 @@ class NavState extends State<NavBar> {
               loggedIn = Authorization().currentUser == null ? false : true;
             });
           },
+          favouriteCallback: addRemoveFavourite,
         ),
         Text("@2"),
         Profile(

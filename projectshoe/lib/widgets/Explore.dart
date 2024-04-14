@@ -4,6 +4,11 @@ import 'package:projectshoe/services/database.dart';
 import 'package:projectshoe/widgets/Shoe.dart';
 
 class Explore extends StatefulWidget {
+  final Function addRemoveFavourite;
+  final List<QueryDocumentSnapshot<Map<String, dynamic>>> favouriteShoes;
+
+  Explore({required this.addRemoveFavourite, required this.favouriteShoes});
+
   State<Explore> createState() => ExploreState();
 }
 
@@ -27,7 +32,7 @@ class ExploreState extends State<Explore> {
                 }
                 if (!snapshot.hasData) {
                   print('Data: NO');
-                  return const LinearProgressIndicator();
+                  return const CircularProgressIndicator();
                 }
                 print('Data: YES');
                 var listOfDocs = snapshot.data!.docs;
@@ -38,7 +43,14 @@ class ExploreState extends State<Explore> {
                       itemCount: listOfDocs.length,
                       itemBuilder: (BuildContext context, index) {
                         var doc = listOfDocs[index];
-                        return shoe(document: doc);
+
+                        return shoe(
+                          document: doc,
+                          favourited: widget.favouriteShoes.any(
+                              (shoe) => shoe.data()["id"] == doc.data()["id"]),
+                          favouriteShoes: widget.favouriteShoes,
+                          addRemoveFavourite: widget.addRemoveFavourite,
+                        );
                       }),
                 );
               })
