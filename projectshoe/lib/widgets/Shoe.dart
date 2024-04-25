@@ -2,30 +2,105 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:projectshoe/services/authorization.dart';
 
-class shoe extends StatefulWidget {
+class Shoe extends StatefulWidget {
   final QueryDocumentSnapshot<Map<String, dynamic>> document;
   bool favourited;
   final Function addRemoveFavourite;
   List<DocumentSnapshot<Map<String, dynamic>>> favouriteShoes;
+  List<Map<String, dynamic>> cartItems;
+  final Function addToCart;
 
-  shoe({
-    required this.document,
-    required this.favourited,
-    required this.addRemoveFavourite,
-    required this.favouriteShoes,
-  });
+  Shoe(
+      {required this.document,
+      required this.favourited,
+      required this.addRemoveFavourite,
+      required this.favouriteShoes,
+      required this.cartItems,
+      required this.addToCart});
 
-  State<shoe> createState() => ShoeState();
+  @override
+  State<Shoe> createState() => ShoeState();
 }
 
-class ShoeState extends State<shoe> {
+class ShoeState extends State<Shoe> {
+  final formKey = GlobalKey<FormState>();
+  final TextEditingController shoeSizeController = TextEditingController();
+
   Widget getWidget() {
     if (Authorization().currentUser != null) {
       return Column(
         children: [
-          Padding(
-            padding: EdgeInsets.only(bottom: 30.0),
-            child: Icon(Icons.shopping_bag_outlined),
+          GestureDetector(
+            onTap: () => {
+              showDialog(
+                  context: context,
+                  builder: (context) => Form(
+                        key: formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              AlertDialog(
+                                title: const Text("What is the shoe size?"),
+                                content: Center(
+                                  child: Column(
+                                    children: [
+                                      TextFormField(
+                                        decoration: const InputDecoration(
+                                            hintText: "Shoe Size"),
+                                        controller: shoeSizeController,
+                                        validator: (input) {
+                                          return (int.tryParse(input!) !=
+                                                      null ||
+                                                  input == "")
+                                              ? null
+                                              : 'Provide a number.';
+                                        },
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                actions: [
+                                  IconButton(
+                                    icon: const Icon(Icons.add),
+                                    onPressed: () {
+                                      try {
+                                        if (shoeSizeController.text != "" &&
+                                            formKey.currentState!.validate()) {
+                                          //Add to the database and the cart
+                                          var shoe = widget.document.data();
+                                          shoe["size"] =
+                                              shoeSizeController.text;
+                                          widget.cartItems.add(shoe);
+                                          //Only add to database if user logged in
+                                          if (Authorization().currentUser !=
+                                              null) {
+                                            widget.addToCart(
+                                                shoe,
+                                                Authorization()
+                                                    .currentUser!
+                                                    .uid);
+                                          }
+                                          //Resetting to the explore page
+                                          shoeSizeController.clear();
+                                          Navigator.pop(context);
+                                        }
+                                      } catch (e) {
+                                        print(e);
+                                      }
+                                    },
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ))
+            },
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 30.0),
+              child: Icon(Icons.shopping_bag_outlined),
+            ),
           ),
           GestureDetector(
             onTap: () => {
@@ -74,7 +149,7 @@ class ShoeState extends State<shoe> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
+                    SizedBox(
                       height: 100.0,
                       child: const Row(
                         children: [Icon(Icons.gamepad)],

@@ -6,19 +6,27 @@ import 'package:projectshoe/widgets/Shoe.dart';
 class Explore extends StatefulWidget {
   final Function addRemoveFavourite;
   final List<QueryDocumentSnapshot<Map<String, dynamic>>> favouriteShoes;
+  final List<Map<String, dynamic>> cartItems;
+  final Function addToCart;
 
-  Explore({required this.addRemoveFavourite, required this.favouriteShoes});
+  Explore(
+      {required this.addRemoveFavourite,
+      required this.favouriteShoes,
+      required this.cartItems,
+      required this.addToCart});
 
   State<Explore> createState() => ExploreState();
 }
 
 class ExploreState extends State<Explore> {
   Database db = Database();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Explore"),
+        scrolledUnderElevation: 20.0,
       ),
       body: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -44,12 +52,14 @@ class ExploreState extends State<Explore> {
                       itemBuilder: (BuildContext context, index) {
                         var doc = listOfDocs[index];
 
-                        return shoe(
+                        return Shoe(
                           document: doc,
                           favourited: widget.favouriteShoes.any(
                               (shoe) => shoe.data()["id"] == doc.data()["id"]),
                           favouriteShoes: widget.favouriteShoes,
                           addRemoveFavourite: widget.addRemoveFavourite,
+                          cartItems: widget.cartItems,
+                          addToCart: widget.addToCart,
                         );
                       }),
                 );

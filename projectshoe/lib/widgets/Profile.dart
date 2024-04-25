@@ -20,26 +20,30 @@ class ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     if (widget.loggedIn) {
-      return Column(
-        children: [
-          ProfileInfo(
-            user: Authorization().currentUser,
+      return Scaffold(
+          appBar: AppBar(
+            title: const Text("Profile"),
           ),
-          ElevatedButton(
-            child: const Text("Log Out"),
-            onPressed: () async {
-              try {
-                await Authorization().logOut();
-                //Update the parent State
-                widget.authCallback();
-                setState(() {});
-              } catch (e) {
-                print(e);
-              }
-            },
-          ),
-        ],
-      );
+          body: Column(
+            children: [
+              ProfileInfo(
+                user: Authorization().currentUser,
+              ),
+              ElevatedButton(
+                child: const Text("Log Out"),
+                onPressed: () async {
+                  try {
+                    await Authorization().logOut();
+                    //Update the parent State
+                    widget.authCallback();
+                    setState(() {});
+                  } catch (e) {
+                    print(e);
+                  }
+                },
+              ),
+            ],
+          ));
     } else {
       return Login(
         authCallback: widget.authCallback,

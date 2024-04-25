@@ -27,15 +27,13 @@ class Database {
     }
   }
 
-  Future<QuerySnapshot<Map<String, dynamic>>> streamOfFavouriteShoes(
-      String userId) {
+  Future<QuerySnapshot<Map<String, dynamic>>> favouriteShoes(String userId) {
     try {
       return FirebaseFirestore.instance
           .collection("users")
           .doc(userId)
           .collection("favourites")
-          .snapshots()
-          .first;
+          .get();
     } catch (e) {
       print('Database streamOfFavourites: Catch $e');
       rethrow;
@@ -68,6 +66,88 @@ class Database {
               }));
     } catch (e) {
       print('Database removeFavouriteShoe: CATCH $e.toString');
+    }
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getCartItems(String userId) {
+    try {
+      return FirebaseFirestore.instance
+          .collection("users")
+          .doc(userId)
+          .collection("cart")
+          .get();
+    } catch (e) {
+      print('Database streamOfFavourites: Catch $e');
+      rethrow;
+    }
+  }
+
+  Future<void> addCartShoe(Map<String, dynamic> shoe, String userId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(userId)
+          .collection("cart")
+          .add(shoe);
+      print("SUCCESSS WOWZERS");
+    } catch (e) {
+      print('Database addCartShoe: CATCH $e.toString');
+    }
+  }
+
+  Future<void> removeCartShoe(
+      String userId, int shoeId, String shoeSize) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(userId)
+          .collection("cart")
+          .where("id", isEqualTo: shoeId)
+          .where("size", isEqualTo: shoeSize)
+          .get()
+          .then((value) => value.docs.forEach((element) {
+                element.reference.delete();
+              }));
+    } catch (e) {
+      print('Database addCartShoe: CATCH $e.toString');
+    }
+  }
+
+  Future<void> checkout(
+      String userId, List<Map<String, dynamic>> cartItem) async {
+    String? id;
+    try {
+      //Create a new record
+
+      await FirebaseFirestore.instance.collection("Records").add({
+        "Buyer": userId,
+        "Date": DateTime.now().toUtc(),
+        "TotalCost": cartItem.fold(0.00, (p, c) => p + c["Cost"])
+      }).then((DocumentReference docRef) => id = docRef.id);
+
+      await getCartItems(userId).then((snapshot) => {
+            for (DocumentSnapshot doc in snapshot.docs)
+              {
+                FirebaseFirestore.instance
+                    .collection("Records")
+                    .doc(id)
+                    .collection("Shoes")
+                    .add(doc.data() as Map<String, dynamic>)
+              }
+          });
+      //First empty the cart in the user
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(userId)
+          .collection("cart")
+          .get()
+          .then((snapshot) => {
+                for (DocumentSnapshot doc in snapshot.docs)
+                  {doc.reference.delete()}
+              });
+      //Create a record of the checkout
+    } catch (e) {
+      print("Checkout: Catch $e");
     }
   }
 }

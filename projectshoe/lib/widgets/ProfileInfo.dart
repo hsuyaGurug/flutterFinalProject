@@ -10,6 +10,7 @@ class ProfileInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
         color: Colors.greenAccent,
         borderRadius: BorderRadius.circular(10),
