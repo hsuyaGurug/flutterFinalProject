@@ -6,11 +6,13 @@ class Cart extends StatefulWidget {
   final List<Map<String, dynamic>> cart;
   final Function removeShoeFromCart;
   final Function checkout;
+  final Function parentCallback;
 
   Cart(
       {required this.cart,
       required this.removeShoeFromCart,
-      required this.checkout});
+      required this.checkout,
+      required this.parentCallback});
 
   State<Cart> createState() => CartState();
 }
@@ -30,8 +32,11 @@ class CartState extends State<Cart> {
                 child: TextButton(
                   onPressed: () => {
                     widget.checkout(
-                        Authorization().currentUser!.uid, widget.cart),
-                    setState(() {})
+                        Authorization().currentUser != null
+                            ? Authorization().currentUser!.uid
+                            : "Anonymous",
+                        widget.cart),
+                    widget.parentCallback()
                   },
                   style: TextButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 217, 255, 233),

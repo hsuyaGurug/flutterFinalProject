@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:projectshoe/services/authorization.dart';
 
 class Database {
   Future<void> createNewUser(
@@ -125,17 +126,27 @@ class Database {
         "TotalCost": cartItem.fold(0.00, (p, c) => p + c["Cost"])
       }).then((DocumentReference docRef) => id = docRef.id);
 
-      await getCartItems(userId).then((snapshot) => {
-            for (DocumentSnapshot doc in snapshot.docs)
-              {
-                FirebaseFirestore.instance
-                    .collection("Records")
-                    .doc(id)
-                    .collection("Shoes")
-                    .add(doc.data() as Map<String, dynamic>)
-              }
-          });
-      //First empty the cart in the user
+      if (Authorization().currentUser != null) {
+        await getCartItems(userId).then((snapshot) => {
+              for (DocumentSnapshot doc in snapshot.docs)
+                {
+                  FirebaseFirestore.instance
+                      .collection("Records")
+                      .doc(id)
+                      .collection("Shoes")
+                      .add(doc.data() as Map<String, dynamic>)
+                }
+            });
+      } else {
+        for (var doc in cartItem) {
+          FirebaseFirestore.instance
+              .collection("Records")
+              .doc(id)
+              .collection("Shoes")
+              .add(doc);
+        }
+      }
+      // empty the cart in the user
       await FirebaseFirestore.instance
           .collection("users")
           .doc(userId)

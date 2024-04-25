@@ -11,7 +11,8 @@ class Shoe extends StatefulWidget {
   final Function addToCart;
 
   Shoe(
-      {required this.document,
+      {super.key,
+      required this.document,
       required this.favourited,
       required this.addRemoveFavourite,
       required this.favouriteShoes,
@@ -97,7 +98,7 @@ class ShoeState extends State<Shoe> {
                         ),
                       ))
             },
-            child: Padding(
+            child: const Padding(
               padding: EdgeInsets.only(bottom: 30.0),
               child: Icon(Icons.shopping_bag_outlined),
             ),
@@ -116,21 +117,82 @@ class ShoeState extends State<Shoe> {
               }),
             },
             child: Padding(
-              padding: EdgeInsets.only(top: 30.0),
+              padding: const EdgeInsets.only(top: 30.0),
               child: widget.favourited
-                  ? Icon(Icons.favorite)
-                  : Icon(Icons.favorite_border_outlined),
+                  ? const Icon(Icons.favorite)
+                  : const Icon(Icons.favorite_border_outlined),
             ),
           )
         ],
       );
     } else {
       return Column(children: [
-        Padding(
-          padding: EdgeInsets.only(bottom: 30.0),
-          child: widget.favourited
-              ? Icon(Icons.favorite)
-              : Icon(Icons.favorite_border_outlined),
+        GestureDetector(
+          onTap: () => {
+            showDialog(
+                context: context,
+                builder: (context) => Form(
+                      key: formKey,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          children: [
+                            AlertDialog(
+                              title: const Text("What is the shoe size?"),
+                              content: Center(
+                                child: Column(
+                                  children: [
+                                    TextFormField(
+                                      decoration: const InputDecoration(
+                                          hintText: "Shoe Size"),
+                                      controller: shoeSizeController,
+                                      validator: (input) {
+                                        return (int.tryParse(input!) != null ||
+                                                input == "")
+                                            ? null
+                                            : 'Provide a number.';
+                                      },
+                                    )
+                                  ],
+                                ),
+                              ),
+                              actions: [
+                                IconButton(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () {
+                                    try {
+                                      if (shoeSizeController.text != "" &&
+                                          formKey.currentState!.validate()) {
+                                        //Add to the database and the cart
+                                        var shoe = widget.document.data();
+                                        shoe["size"] = shoeSizeController.text;
+                                        widget.cartItems.add(shoe);
+                                        //Only add to database if user logged in
+                                        if (Authorization().currentUser !=
+                                            null) {
+                                          widget.addToCart(shoe,
+                                              Authorization().currentUser!.uid);
+                                        }
+                                        //Resetting to the explore page
+                                        shoeSizeController.clear();
+                                        Navigator.pop(context);
+                                      }
+                                    } catch (e) {
+                                      print(e);
+                                    }
+                                  },
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ))
+          },
+          child: const Padding(
+            padding: EdgeInsets.only(bottom: 30.0),
+            child: Icon(Icons.shopping_bag_outlined),
+          ),
         ),
       ]);
     }
@@ -149,9 +211,9 @@ class ShoeState extends State<Shoe> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       height: 100.0,
-                      child: const Row(
+                      child: Row(
                         children: [Icon(Icons.gamepad)],
                       ),
                     ),
@@ -159,10 +221,10 @@ class ShoeState extends State<Shoe> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                            style: TextStyle(fontSize: 20.0),
+                            style: const TextStyle(fontSize: 20.0),
                             "${widget.document.data()["Brand"]} ${widget.document.data()["Name"]}"),
                         Text(
-                            style: TextStyle(fontSize: 20.0),
+                            style: const TextStyle(fontSize: 20.0),
                             "\$ ${widget.document.data()["Cost"]}.00")
                       ],
                     ),

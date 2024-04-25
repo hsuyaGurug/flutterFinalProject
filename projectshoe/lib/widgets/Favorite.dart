@@ -8,12 +8,14 @@ class Favorite extends StatefulWidget {
   final Function authCallback;
   final Function favouriteCallback;
   final List<DocumentSnapshot<Map<String, dynamic>>> favouriteShoes;
+  final Function addCart;
 
   Favorite(
       {required this.loggedIn,
       required this.authCallback,
       required this.favouriteCallback,
-      required this.favouriteShoes});
+      required this.favouriteShoes,
+      required this.addCart});
   @override
   State<Favorite> createState() => FavoriteState();
 }
@@ -36,6 +38,7 @@ class FavoriteState extends State<Favorite> {
                           return favouriteShoe(
                               document: widget.favouriteShoes[index],
                               addRemoveFavourite: widget.favouriteCallback,
+                              addCart: widget.addCart,
                               parentCallback: () => {setState(() {})});
                         }),
                   ),

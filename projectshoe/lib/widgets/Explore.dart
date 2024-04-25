@@ -53,6 +53,7 @@ class ExploreState extends State<Explore> {
                         var doc = listOfDocs[index];
 
                         return Shoe(
+                          key: Key("shoe-${doc.data()["id"]}"),
                           document: doc,
                           favourited: widget.favouriteShoes.any(
                               (shoe) => shoe.data()["id"] == doc.data()["id"]),

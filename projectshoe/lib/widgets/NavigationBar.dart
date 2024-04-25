@@ -71,6 +71,7 @@ class NavState extends State<NavBar> {
 
   void addToCart(Map<String, dynamic> shoe, userId) {
     db.addCartShoe(shoe, userId);
+    cart.add(shoe);
   }
 
   void removeFromCart(String userId, Map<String, dynamic> shoe) {
@@ -81,17 +82,6 @@ class NavState extends State<NavBar> {
   void checkout(String userId, List<Map<String, dynamic>> cartItems) {
     db.checkout(userId, cartItems);
     cart = [];
-  }
-
-  Future<List<QuerySnapshot<Map<String, dynamic>>>> futureToList(
-      Future<QuerySnapshot<Map<String, dynamic>>> future) async {
-    // Wait for the future to complete
-    QuerySnapshot<Map<String, dynamic>> snapshot = await future;
-
-    // Convert the single QuerySnapshot to a list
-    List<QuerySnapshot<Map<String, dynamic>>> list = [snapshot];
-
-    return list;
   }
 
   @override
@@ -124,21 +114,39 @@ class NavState extends State<NavBar> {
           authCallback: () {
             setState(() {
               loggedIn = Authorization().currentUser == null ? false : true;
+              if (loggedIn) {
+                getCartItems();
+                getFavouriteShoes();
+              } else {
+                cart = [];
+                favouriteShoes = [];
+              }
             });
           },
           favouriteCallback: addRemoveFavourite,
           favouriteShoes: favouriteShoes,
+          addCart: addToCart,
         ),
         Cart(
           cart: cart,
           removeShoeFromCart: removeFromCart,
           checkout: checkout,
+          parentCallback: () {
+            setState(() {});
+          },
         ),
         Profile(
           loggedIn: loggedIn,
           authCallback: () {
             setState(() {
               loggedIn = Authorization().currentUser == null ? false : true;
+              if (loggedIn) {
+                getCartItems();
+                getFavouriteShoes();
+              } else {
+                cart = [];
+                favouriteShoes = [];
+              }
             });
           },
         ),
